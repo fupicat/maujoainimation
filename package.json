@@ -1,0 +1,19 @@
+{
+  "name": "maujoa-animation-infinito",
+  "type": "module",
+  "version": "0.0.1",
+  "license": "WTFPL",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^2.1.8"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11"
+  }
+}

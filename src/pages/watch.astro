@@ -1,0 +1,283 @@
+---
+import * as fs from "fs/promises";
+import * as path from "path";
+
+const slug = new URL(Astro.request.url).searchParams.get("v")!;
+
+type Scene = {
+  image: string;
+  type: string;
+  audio: string;
+  text: string;
+};
+
+type VideoTimeline = {
+  title: string;
+  scenes: Scene[];
+};
+
+const video: VideoTimeline = JSON.parse(
+  (
+    await fs.readFile(path.resolve(process.cwd(), `public/${slug}/video.json`))
+  ).toString()
+);
+---
+
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{video.title} - YouTube</title>
+  </head>
+  <body>
+    <button id="play"
+      ><svg height="100%" version="1.1" viewBox="0 0 68 48" width="100%"
+        ><path
+          class="ytp-large-play-button-bg"
+          d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z"
+          fill="#f00"></path><path d="M 45,24 27,14 27,34" fill="#fff"
+        ></path></svg
+      ></button
+    >
+    <audio id="kevin" src="/kevin.mp3" loop preload="auto"></audio>
+    <audio id="kevinfim" src="/kevinfim.mp3" preload="auto"></audio>
+    <div class="scenes paused">
+      {
+        video.scenes.map((scene) => (
+          <div class="scene">
+            <img class={scene.type} src={scene.image || "/Maujoa.png"} />
+            <div class="subtitle">
+              <p>{scene.text}</p>
+            </div>
+            {scene.audio && <audio src={scene.audio} />}
+          </div>
+        ))
+      }
+    </div>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    background-color: #0f0f0f;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  #play {
+    all: unset;
+    width: 68px;
+    height: 48px;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+
+    z-index: 1;
+
+    cursor: pointer;
+  }
+
+  #play .ytp-large-play-button-bg {
+    transition: fill 0.1s cubic-bezier(0.4, 0, 1, 1),
+      fill-opacity 0.1s cubic-bezier(0.4, 0, 1, 1);
+    fill: #212121;
+    fill-opacity: 0.8;
+  }
+
+  #play:hover .ytp-large-play-button-bg {
+    transition: fill 0.1s cubic-bezier(0, 0, 0.2, 1),
+      fill-opacity 0.1s cubic-bezier(0, 0, 0.2, 1);
+    fill: #f00;
+    fill-opacity: 1;
+  }
+
+  .scenes {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    max-width: 1080px;
+    margin: auto;
+  }
+
+  .scenes.paused {
+    background-image: url("/thumbnail.webp");
+    background-size: cover;
+    background-position: center;
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
+  .scenes.fade-out {
+    animation: fade-out 5s linear forwards;
+  }
+
+  .scenes .scene {
+    display: none;
+  }
+
+  .scenes .scene.active {
+    position: relative;
+    display: flex;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: white;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .scenes .scene img {
+    height: 100%;
+  }
+
+  .scenes .scene img.image {
+    align-self: center;
+  }
+
+  .scenes .scene img.pose {
+    align-self: flex-end;
+    transform-origin: bottom;
+  }
+
+  @keyframes poseChange {
+    0% {
+      scale: 1 0.8;
+    }
+
+    50% {
+      scale: 1 1.08;
+    }
+
+    100% {
+      scale: 1 1;
+    }
+  }
+
+  .scenes .scene.active img.pose {
+    animation: poseChange 0.1s steps(1, end) forwards;
+  }
+
+  .scenes .scene .subtitle {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    margin: auto;
+    padding: 2rem 6rem;
+  }
+
+  .scenes .scene .subtitle p {
+    background-color: rgba(8, 8, 8, 0.75);
+    color: rgb(255, 255, 255);
+    font-family: "YouTube Noto", Roboto, "Arial Unicode Ms", Arial, Helvetica,
+      Verdana, "PT Sans Caption", sans-serif;
+    font-size: 20.475px;
+    padding: 0.25em;
+  }
+</style>
+
+<script>
+  let currentScene = 0;
+
+  const sceneWrapper = document.querySelector<HTMLDivElement>(".scenes")!;
+  const scenes = document.querySelectorAll(".scene");
+  const playButton = document.querySelector<HTMLButtonElement>("#play")!;
+  const kevin = document.querySelector<HTMLAudioElement>("#kevin")!;
+  kevin.volume = 0.02;
+  const kevinFim = document.querySelector<HTMLAudioElement>("#kevinfim")!;
+  kevinFim.volume = 0.02;
+
+  playButton.addEventListener("click", () => {
+    currentScene = 0;
+    scenes[0].classList.add("active");
+    const audio = scenes[currentScene].querySelector<HTMLAudioElement>("audio");
+
+    if (audio) {
+      audio.play();
+      audio.onended = nextScene;
+    } else {
+      const msg = new SpeechSynthesisUtterance();
+      msg.lang = "pt-BR";
+      msg.text =
+        scenes[currentScene].querySelector<HTMLDivElement>(
+          ".subtitle p"
+        )!.textContent!;
+      msg.rate = 1.2;
+      msg.pitch = 0;
+      msg.voice = window.speechSynthesis.getVoices()[0];
+      msg.onend = nextScene;
+
+      window.speechSynthesis.speak(msg);
+    }
+    playButton.style.display = "none";
+
+    sceneWrapper.classList.remove("paused");
+  });
+
+  function nextScene() {
+    if (currentScene >= scenes.length - 1) {
+      sceneWrapper.classList.add("fade-out");
+      kevin.pause();
+      kevinFim.play();
+
+      setTimeout(() => {
+        scenes[scenes.length - 1].classList.remove("active");
+        sceneWrapper.classList.remove("fade-out");
+        sceneWrapper.classList.add("paused");
+
+        playButton.style.display = "block";
+      }, 5000);
+      return;
+    }
+
+    if (currentScene === 0) {
+      kevin.currentTime = 0;
+      kevinFim.currentTime = 0;
+      kevin.play();
+    }
+
+    scenes[currentScene].classList.remove("active");
+    currentScene++;
+    scenes[currentScene].classList.add("active");
+    const audio =
+      scenes[currentScene].querySelector<HTMLAudioElement>("audio")!;
+
+    if (audio) {
+      audio.play();
+      audio.onended = nextScene;
+    } else {
+      const msg = new SpeechSynthesisUtterance();
+      msg.lang = "pt-BR";
+      msg.text =
+        scenes[currentScene].querySelector<HTMLDivElement>(
+          ".subtitle p"
+        )!.textContent!;
+      msg.rate = 1.2;
+      msg.pitch = 0;
+      msg.voice = window.speechSynthesis.getVoices()[0];
+      msg.onend = nextScene;
+
+      window.speechSynthesis.speak(msg);
+    }
+  }
+</script>

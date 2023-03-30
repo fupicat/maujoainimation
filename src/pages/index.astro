@@ -1,0 +1,52 @@
+---
+---
+
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Maujoa Animation Generator</title>
+  </head>
+  <body>
+    <h1>Maujoa Animation Generator</h1>
+    <form>
+      <label>
+        <p>Título do vídeo:</p>
+        <input type="text" name="title" />
+      </label>
+      <button type="submit">Gerar</button>
+    </form>
+  </body>
+</html>
+
+<script>
+  document
+    .querySelector<HTMLFormElement>("form")!
+    .addEventListener("submit", (e) => {
+      e.preventDefault();
+      const title =
+        document.querySelector<HTMLInputElement>("input[name=title]")!.value;
+
+      (async () => {
+        const response = await fetch("/api/video", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title,
+          }),
+        });
+
+        const json = await response.json();
+
+        if (response.ok) {
+          window.location.href = "/watch?v=" + json.slug;
+        } else {
+          console.log(response);
+        }
+      })();
+    });
+</script>
