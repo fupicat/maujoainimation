@@ -7,19 +7,157 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>Maujoa Animation Generator</title>
+    <title>MaujoaAInimation</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <h1>Maujoa Animation Generator</h1>
-    <form>
-      <label>
-        <p>Título do vídeo:</p>
-        <input type="text" name="title" />
-      </label>
-      <button type="submit">Gerar</button>
-    </form>
+    <h1>MaujoAInimation</h1>
+    <div class="video">
+      <div class="within">
+        <img class="thumbnail" src="/thumbnail.webp" alt="" />
+        <form>
+          <input
+            placeholder="O dia em que eu..."
+            type="text"
+            name="title"
+            required
+          />
+          <p class="gray">714 visualizações · há 4 anos</p>
+          <div class="channel">
+            <img src="/maujoaicon.jpg" alt="" />
+            <p class="gray">Maujoa Animation</p>
+          </div>
+          <p class="gray description">
+            Leia a descrição V V Clica em mostrar mais inscreva-se também nesse
+            canal Meu canal de games: @MaujoaGames.
+          </p>
+          <button type="submit">Gerar</button>
+        </form>
+      </div>
+    </div>
   </body>
 </html>
+
+<style>
+  body {
+    margin: 0;
+    background-color: #0f0f0f;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  h1 {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    text-align: center;
+
+    color: white;
+    font-family: "Bebas Neue", Impact, Haettenschweiler, "Arial Narrow Bold",
+      sans-serif;
+  }
+
+  .video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .within {
+    display: flex;
+    gap: 12px;
+  }
+
+  .video .thumbnail {
+    width: 360px;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+  }
+
+  .video form input {
+    all: unset;
+
+    color: #f1f1f1;
+    font-family: "Roboto", "Arial", sans-serif;
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 400;
+    white-space: normal;
+    width: 350px;
+  }
+
+  .video form .channel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+  }
+
+  .video form .channel img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+  }
+
+  .description {
+    width: 323px;
+  }
+
+  .gray {
+    font-family: "Roboto", "Arial", sans-serif;
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 400;
+    color: #aaa;
+    margin: 0;
+  }
+
+  form button {
+    all: unset;
+
+    font-family: "Roboto", "Arial", sans-serif;
+    font-weight: 500;
+    color: #0f0f0f;
+    background-color: #f1f1f1;
+
+    padding: 0 16px;
+    height: 36px;
+    font-size: 14px;
+    line-height: 36px;
+    border-radius: 18px;
+
+    cursor: pointer;
+    margin-top: 12px;
+  }
+
+  form button:hover {
+    background-color: #d9d9d9;
+  }
+
+  form button:active {
+    background-color: #aeaeae;
+  }
+
+  form button:disabled {
+    background-color: #aeaeae;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+</style>
 
 <script>
   document
@@ -28,6 +166,10 @@
       e.preventDefault();
       const title =
         document.querySelector<HTMLInputElement>("input[name=title]")!.value;
+
+      document.querySelector<HTMLButtonElement>("button")!.disabled = true;
+      document.querySelector<HTMLHeadingElement>("h1")!.textContent =
+        "Gerando... Veja o terminal para ver o progresso.";
 
       (async () => {
         const response = await fetch("/api/video", {
@@ -46,6 +188,10 @@
           window.location.href = "/watch?v=" + json.slug;
         } else {
           console.log(response);
+          document.querySelector<HTMLHeadingElement>("h1")!.textContent =
+            "Erro! Por favor, cheque o terminal e os logs e tente novamente.";
+
+          document.querySelector<HTMLButtonElement>("button")!.disabled = false;
         }
       })();
     });

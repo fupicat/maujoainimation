@@ -203,9 +203,9 @@ const video: VideoTimeline = JSON.parse(
   const scenes = document.querySelectorAll(".scene");
   const playButton = document.querySelector<HTMLButtonElement>("#play")!;
   const kevin = document.querySelector<HTMLAudioElement>("#kevin")!;
-  kevin.volume = 0.02;
+  kevin.volume = 0.015;
   const kevinFim = document.querySelector<HTMLAudioElement>("#kevinfim")!;
-  kevinFim.volume = 0.02;
+  kevinFim.volume = 0.015;
 
   playButton.addEventListener("click", () => {
     currentScene = 0;
